@@ -4,13 +4,17 @@ namespace Rada87\DpdGeoApi;
 
 use DateTime;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use Rada87\DpdGeoApi\Enums\Modes;
 use Rada87\DpdGeoApi\Exceptions\DpdApiGeneralException;
-use Rada87\DpdGeoApi\Models\Customer;
-use Rada87\DpdGeoApi\Models\DeliveryOptions;
-use Rada87\DpdGeoApi\Models\Parcel\References;
-use Rada87\DpdGeoApi\Models\Payer;
+use Rada87\DpdGeoApi\Models\Request\Customer\Customer;
+use Rada87\DpdGeoApi\Models\Request\DeliveryOptions;
+use Rada87\DpdGeoApi\Models\Request\Payer;
+use Rada87\DpdGeoApi\Models\Request\References;
+use Rada87\DpdGeoApi\Models\Request\Services;
+use Rada87\DpdGeoApi\Models\Request\Subject;
+use Rada87\DpdGeoApi\Models\Response\Parcel;
 
 class Connection {
     private $apiKey;
@@ -27,6 +31,65 @@ class Connection {
 
     public function getCustomers() {
         return $this->sendRequest('GET', '/v1/me');
+    }
+
+    /**
+     * @param string $DSW
+     * @return mixed
+     * @throws DpdApiGeneralException
+     */
+    public function getCustomerAddresses(string $DSW)
+    {
+        $url = "/v1/customers/{$DSW}/addresses";
+        return $this->sendRequest('GET', $url);
+    }
+
+    /**
+     * @param Customer $customer
+     * @param DeliveryOptions $deliveryOptions
+     * @param string $shipmentType
+     * @param Subject $sender
+     * @param Subject $receiver
+     * @param Payer $payer
+     * @param string $id
+     * @param References $references
+     * @param Subject $declaredSender
+     * @param Services $services
+     * @param Parcel[] $parcels
+     * @return mixed
+     * @throws DpdApiGeneralException
+     * @throws GuzzleException
+     */
+    public function createShipment(
+        $customer,
+        $deliveryOptions,
+        $shipmentType,
+        $sender,
+        $receiver,
+        $payer,
+        $id,
+        $references,
+        $declaredSender,
+        $services,
+        $parcels
+    ) {
+
+        $data = [
+            [
+                "shipmentType" => $shipmentType,
+                "customer" => $customer,
+                "sender" => $sender,
+                "receiver" => $receiver,
+                "payer" => $payer,
+                "id" => $id,
+                "references" => $references,
+                "declaredSender" => $declaredSender,
+                "services" => $services,
+                "parcels" => $parcels
+            ]
+        ];
+
+        return $this->sendRequest('POST', '/v1/parcels', $data);
     }
 
     public function getTrackingInfoForMultipleParcels($parcelNumbers) {
@@ -50,26 +113,15 @@ class Connection {
         return $this->sendRequest('POST', "/v1/parcels/$parcelIdent/labels");
     }
 
-    public function createParcel(
-        Models\Request\Customer        $customer,
-        Models\Request\DeliveryOptions $deliveryOptions,
-        string                         $shipmentType,
-        string                         $sender,
-        string $receiver,
-        Models\Request\Payer           $payer,
-        Models\Request\References $references,
-        Customer\DeclaredSender        $declaredSender
-    ) {
-        return $this->sendRequest('POST', '/v1/parcels', $parcelData);
-    }
 
-    public function updateParcel($parcelIdent, $parcelData) {
-        return $this->sendRequest('PUT', "/v1/parcels/$parcelIdent", $parcelData);
-    }
-
-    public function deleteParcel($parcelIdent) {
-        return $this->sendRequest('DELETE', "/v1/parcels/$parcelIdent");
-    }
+    /**
+     * @param $method
+     * @param $endpoint
+     * @param $data
+     * @return mixed
+     * @throws DpdApiGeneralException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
 
     private function sendRequest($method, $endpoint, $data = []) {
         try {
@@ -88,6 +140,10 @@ class Connection {
         }
     }
 
+    /**
+     * @param $mode
+     * @return string
+     */
     private function getEndpointUrl($mode)
     {
         if ($mode == Modes::PRODUCTION) {

@@ -2,6 +2,9 @@
 namespace Rada87\DpdGeoApi\Models\Response;
 
 
+use Rada87\DpdGeoApi\Models\AModelResponse;
+use Rada87\DpdGeoApi\Models\Response\Customer\Address;
+
 class Customer extends AModelResponse
 {
     /**
@@ -17,7 +20,7 @@ class Customer extends AModelResponse
 
     public function __construct($data)
     {
-        $this->customer = new \Rada87\DpdGeoApi\Models\Response\Customer\Customer($data['customer']);
+        $this->customer = new Customer\Customer($data['customer']);
         foreach ($data['addresses'] as $address) {
             $this->addresses[] = new Address($address);
         }

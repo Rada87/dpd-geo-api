@@ -5,10 +5,14 @@ namespace Rada87\DpdGeoApi;
 use DateTime;
 use Rada87\DpdGeoApi\Enums\Modes;
 use Rada87\DpdGeoApi\Exceptions\DpdApiGeneralException;
-use Rada87\DpdGeoApi\Models\Customer;
+use Rada87\DpdGeoApi\Models\Request\Customer\Customer;
 use Rada87\DpdGeoApi\Models\Request\DeliveryOptions;
 use Rada87\DpdGeoApi\Models\Request\Payer;
 use Rada87\DpdGeoApi\Models\Request\References;
+use Rada87\DpdGeoApi\Models\Request\Services;
+use Rada87\DpdGeoApi\Models\Request\Subject;
+use Rada87\DpdGeoApi\Models\Response\Parcel;
+use Rada87\DpdGeoApi\Models\Response\UserAccount;
 
 class Client {
     private $connection;
@@ -17,6 +21,17 @@ class Client {
        $this->connection = new Connection($apiKey, $mode);
     }
 
+    /**
+     * @return Models\Response\Customer
+     */
+    public function getCustomer() {
+        $customers = $this->getCustomers();
+        return reset($customers['customers']);
+    }
+
+    /**
+     * @return array{Models\Response\UserAccount, Models\Response\Customer[]}
+     */
     public function getCustomers() {
         $result = [];
         $response = $this->connection->getCustomers();
@@ -25,13 +40,21 @@ class Client {
 
         $customers = [];
         foreach ($response['customers'] as $item) {
-            $customers = new Customer($item);
+            $customers[] = new Models\Response\Customer($item);
         }
 
         return [
             'userAccount' => $userAccount,
             'customers' => $customers
         ];
+    }
+
+    public function getCustomerAddresses(Customer $customer) {
+        $result = [];
+        $response = $this->connection->getCustomerAddresses($customer->DSW);
+
+        $address = new Address($response);
+        return $address;
     }
 
     public function getTrackingInfoForMultipleParcels($parcelNumbers) {
@@ -42,7 +65,7 @@ class Client {
 
     }
 
-    public function getAllParcels(DateTime $from, DateTime $to) {
+    public function getAllParcels(\DateTime $from, \DateTime $to) {
         $result = [];
         $response = $this->connection->getAllParcels($from, $to);
         return $response;
@@ -56,17 +79,34 @@ class Client {
 
     }
 
-    public function createParcel(
-        Models\Request\Customer $customer,
-        DeliveryOptions $deliveryOptions,
-        string $shipmentType,
-        string $sender,
-        string $receiver,
-        Payer $payer,
-        References $references,
-        Customer\DeclaredSender $declaredSender
+    /**
+     * @param Models\Request\Customer\Customer $customer
+     * @param DeliveryOptions $deliveryOptions
+     * @param string $shipmentType
+     * @param Subject $sender
+     * @param Subject $receiver
+     * @param Payer $payer
+     * @param string $id
+     * @param References $references
+     * @param Subject $declaredSender
+     * @param Services $services
+     * @param Parcel[] $parcels
+     * @return void
+     */
+    public function createShipment(
+        $customer,
+        $deliveryOptions,
+        $shipmentType,
+        $sender,
+        $receiver,
+        $payer,
+        $id,
+        $references,
+        $declaredSender,
+        $services,
+        $parcels
     ) {
-        $this->connection->createParcel($customer, $deliveryOptions, $shipmentType, $sender, $receiver, $payer, $references, $declaredSender);
+        $this->connection->createShipment($customer, $deliveryOptions, $shipmentType, $sender, $receiver, $payer, $id, $references, $declaredSender, $services, $parcels);
     }
 
     public function updateParcel($parcelIdent, $parcelData) {
