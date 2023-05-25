@@ -2,10 +2,15 @@
 
 namespace Rada87\DpdGeoApi;
 
+use DateTime;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Rada87\DpdGeoApi\Enums\Modes;
 use Rada87\DpdGeoApi\Exceptions\DpdApiGeneralException;
+use Rada87\DpdGeoApi\Models\Customer;
+use Rada87\DpdGeoApi\Models\DeliveryOptions;
+use Rada87\DpdGeoApi\Models\Parcel\References;
+use Rada87\DpdGeoApi\Models\Payer;
 
 class Connection {
     private $apiKey;
@@ -32,8 +37,9 @@ class Connection {
         return $this->sendRequest('GET', "/v1/parcels/$parcelNo/tracking");
     }
 
-    public function getAllParcels() {
-        return $this->sendRequest('GET', '/v1/parcels');
+    public function getAllParcels(DateTime $from, DateTime $to) {
+        $url = '/v1/parcels?from=' . urlencode($from->format('Y-m-d')) . '&to=' . urlencode($to->format('Y-m-d'));
+        return $this->sendRequest('GET', $url);
     }
 
     public function printLabelsForMultipleParcels($parcels) {
@@ -44,7 +50,16 @@ class Connection {
         return $this->sendRequest('POST', "/v1/parcels/$parcelIdent/labels");
     }
 
-    public function createParcel($parcelData) {
+    public function createParcel(
+        Models\Request\Customer        $customer,
+        Models\Request\DeliveryOptions $deliveryOptions,
+        string                         $shipmentType,
+        string                         $sender,
+        string $receiver,
+        Models\Request\Payer           $payer,
+        Models\Request\References $references,
+        Customer\DeclaredSender        $declaredSender
+    ) {
         return $this->sendRequest('POST', '/v1/parcels', $parcelData);
     }
 
@@ -66,7 +81,7 @@ class Connection {
             return json_decode($response->getBody()->getContents(), true);
         } catch (RequestException $e) {
             if ($e->hasResponse()) {
-                throw new DpdApiGeneralException('API Request Failed: ' . $e->getResponse()->getReasonPhrase());
+                throw new DpdApiGeneralException('API Request Failed: ' . $e->getResponse()->getReasonPhrase() . ' ' . $e->getMessage());
             } else {
                 throw new DpdApiGeneralException('API Request Failed: ' . $e->getMessage());
             }

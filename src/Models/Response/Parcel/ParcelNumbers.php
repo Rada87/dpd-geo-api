@@ -1,6 +1,6 @@
 <?php
 
-namespace Rada87\DpdGeoApi\Models\Parcel;
+namespace Rada87\DpdGeoApi\Models\Response\Parcel;
 
 class ParcelNumbers {
     /**

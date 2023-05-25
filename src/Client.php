@@ -2,11 +2,13 @@
 
 namespace Rada87\DpdGeoApi;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
+use DateTime;
 use Rada87\DpdGeoApi\Enums\Modes;
 use Rada87\DpdGeoApi\Exceptions\DpdApiGeneralException;
 use Rada87\DpdGeoApi\Models\Customer;
+use Rada87\DpdGeoApi\Models\Request\DeliveryOptions;
+use Rada87\DpdGeoApi\Models\Request\Payer;
+use Rada87\DpdGeoApi\Models\Request\References;
 
 class Client {
     private $connection;
@@ -18,37 +20,57 @@ class Client {
     public function getCustomers() {
         $result = [];
         $response = $this->connection->getCustomers();
+
+        $userAccount = new UserAccount($response['userAccount']);
+
+        $customers = [];
         foreach ($response['customers'] as $item) {
-            $customer = new Customer($item);
+            $customers = new Customer($item);
         }
+
+        return [
+            'userAccount' => $userAccount,
+            'customers' => $customers
+        ];
     }
 
     public function getTrackingInfoForMultipleParcels($parcelNumbers) {
-        return $this->sendRequest('POST', '/v1/parcels/tracking', $parcelNumbers);
+
     }
 
     public function getTrackingInfoForParcel($parcelNo) {
-        return $this->sendRequest('GET', "/v1/parcels/$parcelNo/tracking");
+
     }
 
-    public function getAllParcels() {
-        return $this->sendRequest('GET', '/v1/parcels');
+    public function getAllParcels(DateTime $from, DateTime $to) {
+        $result = [];
+        $response = $this->connection->getAllParcels($from, $to);
+        return $response;
     }
 
     public function printLabelsForMultipleParcels($parcels) {
-        return $this->sendRequest('POST', '/v1/parcels/labels', $parcels);
+
     }
 
     public function printLabelForParcel($parcelIdent) {
-        return $this->sendRequest('POST', "/v1/parcels/$parcelIdent/labels");
+
     }
 
-    public function createParcel($parcelData) {
-        return $this->sendRequest('POST', '/v1/parcels', $parcelData);
+    public function createParcel(
+        Models\Request\Customer $customer,
+        DeliveryOptions $deliveryOptions,
+        string $shipmentType,
+        string $sender,
+        string $receiver,
+        Payer $payer,
+        References $references,
+        Customer\DeclaredSender $declaredSender
+    ) {
+        $this->connection->createParcel($customer, $deliveryOptions, $shipmentType, $sender, $receiver, $payer, $references, $declaredSender);
     }
 
     public function updateParcel($parcelIdent, $parcelData) {
-        return $this->sendRequest('PUT', "/v1/parcels/$parcelIdent", $parcelData);
+
     }
 
 

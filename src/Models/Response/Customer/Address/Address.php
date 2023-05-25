@@ -1,8 +1,12 @@
 <?php
 
-namespace Rada87\DpdGeoApi\Models\Customer;
+namespace Rada87\DpdGeoApi\Models\Response\Customer\Address;
 
-class Address extends AModel
+use Rada87\DpdGeoApi\Models\AModelResponse;
+use Rada87\DpdGeoApi\Models\Customer\Address\Address\Country;
+
+
+class Address extends AModelResponse
 {
     /**
      * @var string
@@ -23,4 +27,5 @@ class Address extends AModel
      * @var string
      */
     public $street;
+
 }

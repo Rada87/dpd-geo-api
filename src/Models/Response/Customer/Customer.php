@@ -1,9 +1,9 @@
 <?php
-namespace Rada87\DpdGeoApi\Models\Customer;
+namespace Rada87\DpdGeoApi\Models\Response\Customer;
 
-use Rada87\DpdGeoApi\Models\AModel;
+use Rada87\DpdGeoApi\Models\AModelResponse;
 
-class Customer extends AModel
+class Customer extends AModelResponse
 {
     /**
      * @var string

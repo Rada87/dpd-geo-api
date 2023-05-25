@@ -1,6 +1,6 @@
 <?php
 
-namespace Rada87\DpdGeoApi\Models;
+namespace Rada87\DpdGeoApi\Models\Response;
 
 class PrintProperties {
     /**

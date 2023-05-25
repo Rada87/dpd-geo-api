@@ -1,12 +1,22 @@
 <?php
 
-namespace Rada87\DpdGeoApi\Models;
+namespace Rada87\DpdGeoApi\Models\Response;
 
-class Parcel {
+class Parcel extends AModelResponse {
     /**
      * @var Parcel\ParcelNumbers
      */
     public $parcelNumbers;
+
+    /**
+     * @var string
+     */
+    public $parcelNumber;
+
+    /**
+     * @var string
+     */
+    public $backParcelNumber;
 
     /**
      * @var Parcel\References
@@ -32,4 +42,9 @@ class Parcel {
      * @var int
      */
     public $id;
+
+    /**
+     * @var AdditionalServices
+     */
+    public $additionalServices;
 }
