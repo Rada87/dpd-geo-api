@@ -1,0 +1,25 @@
+{
+  "name": "rada87/dpd-geo-api",
+  "description": "PHP Library for DPD Geo API",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "keywords": [
+    "DPD",
+    "GeoAPI"
+  ],
+  "authors": [
+    {
+      "name": "Radaman",
+      "email": "info@cs-cart.com"
+    }
+  ],
+  "require": {
+    "php": "^7.2|^8.0",
+    "guzzlehttp/guzzle": "^7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Rada87\\DpdGeoApi\\": "src/"
+    }
+  }
+}
