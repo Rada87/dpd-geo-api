@@ -33,7 +33,7 @@ class Client {
      * @return Customers
      */
     public function getCustomers() {
-        $response = $this->connection->getCustomers();
+        $response = $this->connection->sendRequest('GET', '/v1/me');
         return new Customers($response);
     }
 
@@ -42,7 +42,7 @@ class Client {
      * @return Me
      */
     public function getMeInfo() {
-        $response = $this->connection->getMeInfo();
+        $response = $this->connection->sendRequest('GET', "/v1/me");
         return new Me($response);
     }
 
@@ -53,7 +53,9 @@ class Client {
      */
     public function getCustomerAddresses(Customer $customer) {
         $result = [];
-        $response = $this->connection->getCustomerAddresses($customer->DSW);
+
+        $url = "/v1/customers/{$customer->DSW}/addresses";
+        $response = $this->connection->sendRequest('GET', $url);
 
         if (!empty($response)) {
             foreach ($response as $item) {
@@ -91,7 +93,8 @@ class Client {
         $data = [
             $shipment
         ];
-        $result = $this->connection->createShipment($data);
+
+        $result = $this->connection->sendRequest('POST', '/v1/shipments', $data);
         if (!empty($result)) {
             foreach ($result as $item) {
                 $newShipments[] = new ShipmentResponse($item);
