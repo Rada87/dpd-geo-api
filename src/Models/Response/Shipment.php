@@ -5,6 +5,7 @@ namespace Rada87\DpdGeoApi\Models\Response;
 use Rada87\DpdGeoApi\Models\AModelResponse;
 use Rada87\DpdGeoApi\Models\Response\Shipment\DeclaredSender;
 use Rada87\DpdGeoApi\Models\Response\Shipment\Receiver;
+use Rada87\DpdGeoApi\Models\Response\Shipment\References;
 use Rada87\DpdGeoApi\Models\Response\Shipment\Sender;
 use Rada87\DpdGeoApi\Models\Response\Shipment\Customer;
 use Rada87\DpdGeoApi\Models\Response\Shipment\Services;

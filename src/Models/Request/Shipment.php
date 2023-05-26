@@ -2,27 +2,40 @@
 namespace Rada87\DpdGeoApi\Models\Request;
 
 use Rada87\DpdGeoApi\Models\AModelRequest;
-use Rada87\DpdGeoApi\Models\Response\Parcel;
+use Rada87\DpdGeoApi\Models\Request\Shipment\Customer;
+use Rada87\DpdGeoApi\Models\Request\Shipment\DeclaredSender;
+use Rada87\DpdGeoApi\Models\Request\Shipment\DeliveryOptions;
+use Rada87\DpdGeoApi\Models\Request\Shipment\Parcel;
+use Rada87\DpdGeoApi\Models\Request\Shipment\Receiver;
+use Rada87\DpdGeoApi\Models\Request\Shipment\Sender;
+use Rada87\DpdGeoApi\Models\Request\Shipment\Payer;
+use Rada87\DpdGeoApi\Models\Request\Shipment\Services;
+use Rada87\DpdGeoApi\Models\Request\Shipment\Source;
 
 class Shipment extends AModelRequest
 {
+    /**
+     * @var Customer
+     */
+    public $customer;
+
+    /**
+     * @var DeliveryOptions
+     */
+    public $deliveryOptions;
+
     /**
      * @var string
      */
     public $shipmentType;
 
     /**
-     * @var \Rada87\DpdGeoApi\Models\Response\Customer\Customer
-     */
-    public $customer;
-
-    /**
-     * @var \Rada87\DpdGeoApi\Models\Request\Subject
+     * @var Sender
      */
     public $sender;
 
     /**
-     * @var \Rada87\DpdGeoApi\Models\Request\Subject
+     * @var Receiver
      */
     public $receiver;
 
@@ -42,7 +55,7 @@ class Shipment extends AModelRequest
     public $references;
 
     /**
-     * @var \Rada87\DpdGeoApi\Models\Request\Subject
+     * @var DeclaredSender
      */
     public $declaredSender;
 
@@ -52,7 +65,7 @@ class Shipment extends AModelRequest
     public $services;
 
     /**
-     * @var array|Parcel[]
+     * @var Parcel[]
      */
     public $parcels;
 
@@ -60,4 +73,8 @@ class Shipment extends AModelRequest
      * @var Source
      */
     public $source;
+
+    public function addParcel(Parcel $parcel) {
+        $this->parcels[] = $parcel;
+    }
 }

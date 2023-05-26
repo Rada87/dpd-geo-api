@@ -1,8 +1,10 @@
 <?php
 
-namespace Rada87\DpdGeoApi\Models\Response\Shipment;
+namespace Rada87\DpdGeoApi\Models\Request\Shipment\Parcel;
 
-class References {
+use Rada87\DpdGeoApi\Models\AModelRequest;
+
+class References extends AModelRequest  {
     /**
      * @var string
      */

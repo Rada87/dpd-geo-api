@@ -1,6 +1,6 @@
 <?php
 
-namespace Rada87\DpdGeoApi\Models\Response\Shipment;
+namespace Rada87\DpdGeoApi\Models\Request\Shipment;
 
 class References {
     /**
