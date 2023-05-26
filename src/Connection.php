@@ -74,36 +74,13 @@ class Connection {
      * @throws DpdApiGeneralException
      * @throws GuzzleException
      */
-    public function createShipment(
-        $customer,
-        $deliveryOptions,
-        $shipmentType,
-        $sender,
-        $receiver,
-        $payer,
-        $id,
-        $references,
-        $declaredSender,
-        $services,
-        $parcels
-    ) {
-
-        $data = [
-            [
-                "shipmentType" => $shipmentType,
-                "customer" => $customer,
-                "sender" => $sender,
-                "receiver" => $receiver,
-                "payer" => $payer,
-                "id" => $id,
-                "references" => $references,
-                "declaredSender" => $declaredSender,
-                "services" => $services,
-                "parcels" => $parcels
-            ]
-        ];
-
+    public function createShipment($data) {
         return $this->sendRequest('POST', '/v1/shipments', $data);
+    }
+
+    public function getMeInfo()
+    {
+        return $this->sendRequest('GET', "/v1/me");
     }
 
     public function getTrackingInfoForMultipleParcels($parcelNumbers) {
@@ -114,7 +91,7 @@ class Connection {
         return $this->sendRequest('GET', "/v1/parcels/$parcelNo/tracking");
     }
 
-    public function getAllParcels(DateTime $from, DateTime $to) {
+    public function getParcels(\DateTime $from, \DateTime $to) {
         $url = '/v1/parcels?from=' . urlencode($from->format('Y-m-d')) . '&to=' . urlencode($to->format('Y-m-d'));
         return $this->sendRequest('GET', $url);
     }
@@ -173,4 +150,6 @@ class Connection {
         }
         return $data;
     }
+
+
 }

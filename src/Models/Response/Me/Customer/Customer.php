@@ -1,12 +1,9 @@
 <?php
-namespace Rada87\DpdGeoApi\Models\Request;
+namespace Rada87\DpdGeoApi\Models\Response\Me\Customer;
 
-use Rada87\DpdGeoApi\Models\AModelRequest;
+use Rada87\DpdGeoApi\Models\AModelResponse;
 
-/**
- * Customer DSW, isActive, ID
- */
-class Customer extends AModelRequest
+class Customer extends AModelResponse
 {
     /**
      * @var string
@@ -22,5 +19,4 @@ class Customer extends AModelRequest
      * @var int
      */
     public $id;
-
 }

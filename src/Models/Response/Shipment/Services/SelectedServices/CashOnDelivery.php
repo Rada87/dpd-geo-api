@@ -1,6 +1,6 @@
 <?php
 
-namespace Rada87\DpdGeoApi\Models\Request\Services;
+namespace Rada87\DpdGeoApi\Models\Response\Shipment\Services\SelectedServices;
 
 class CashOnDelivery  {
     /**

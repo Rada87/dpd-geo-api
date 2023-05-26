@@ -5,14 +5,19 @@ namespace Rada87\DpdGeoApi;
 use DateTime;
 use Rada87\DpdGeoApi\Enums\Modes;
 use Rada87\DpdGeoApi\Exceptions\DpdApiGeneralException;
-use Rada87\DpdGeoApi\Models\Request\Customer\Customer;
 use Rada87\DpdGeoApi\Models\Request\DeliveryOptions;
 use Rada87\DpdGeoApi\Models\Request\Payer;
 use Rada87\DpdGeoApi\Models\Request\References;
 use Rada87\DpdGeoApi\Models\Request\Services;
 use Rada87\DpdGeoApi\Models\Request\Subject;
-use Rada87\DpdGeoApi\Models\Response\Parcel;
-use Rada87\DpdGeoApi\Models\Response\UserAccount;
+use Rada87\DpdGeoApi\Models\Response\Customer\Address;
+use Rada87\DpdGeoApi\Models\Response\Customer\Customer;
+use Rada87\DpdGeoApi\Models\Response\Customers;
+use Rada87\DpdGeoApi\Models\Response\Me;
+use Rada87\DpdGeoApi\Models\Response\Me\UserAccount;
+use Rada87\DpdGeoApi\Models\Response\Shipment;
+use Rada87\DpdGeoApi\Request\CreateShipmentResult;
+use Rada87\DpdGeoApi\Models\Response\Shipment\Parcel;
 
 class Client {
     private $connection;
@@ -22,76 +27,74 @@ class Client {
     }
 
     /**
-     * @return Models\Response\Customer
+     * @return Models\Response\Customer;
      */
     public function getCustomer() {
         $customers = $this->getCustomers();
-        return reset($customers['customers']);
+        return empty($customers->customers[0]) ? new Models\Response\Customer() : $customers->customers[0];
+    }
+
+
+    /**
+     * @return Customers
+     */
+    public function getCustomers() {
+        $response = $this->connection->getCustomers();
+        return new Customers($response);
+    }
+
+    public function getMeInfo() {
+        $response = $this->connection->getMeInfo();
+        return new Me($response);
     }
 
     /**
-     * @return array{Models\Response\UserAccount, Models\Response\Customer[]}
+     * @param Customer $customer
+     * @return Address[]
+     * @throws DpdApiGeneralException
      */
-    public function getCustomers() {
-        $result = [];
-        $response = $this->connection->getCustomers();
-
-        $userAccount = new UserAccount($response['userAccount']);
-
-        $customers = [];
-        foreach ($response['customers'] as $item) {
-            $customers[] = new Models\Response\Customer($item);
-        }
-
-        return [
-            'userAccount' => $userAccount,
-            'customers' => $customers
-        ];
-    }
-
     public function getCustomerAddresses(Customer $customer) {
         $result = [];
         $response = $this->connection->getCustomerAddresses($customer->DSW);
 
-        $address = new Address($response);
-        return $address;
-    }
+        if (!empty($response)) {
+            foreach ($response as $item) {
+                $result[] = new Address($item);
+            }
+        }
 
-    public function getTrackingInfoForMultipleParcels($parcelNumbers) {
-
-    }
-
-    public function getTrackingInfoForParcel($parcelNo) {
-
-    }
-
-    public function getAllParcels(\DateTime $from, \DateTime $to) {
-        $result = [];
-        $response = $this->connection->getAllParcels($from, $to);
-        return $response;
-    }
-
-    public function printLabelsForMultipleParcels($parcels) {
-
-    }
-
-    public function printLabelForParcel($parcelIdent) {
-
+        return $result;
     }
 
     /**
-     * @param Models\Request\Customer\Customer $customer
+     * @param DateTime $from
+     * @param DateTime $to
+     * @return Parcel[]
+     */
+    public function getParcels(\DateTime $from, \DateTime $to) {
+        $result = [];
+        $response = $this->connection->getParcels($from, $to);
+        if (!empty($response)) {
+            foreach ($response as $item) {
+                $result[] = new Shipment\Parcel($item);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param Models\Request\Customer $customer
      * @param DeliveryOptions $deliveryOptions
      * @param string $shipmentType
-     * @param Subject $sender
+     * @param Models\Request\Address $sender
      * @param Subject $receiver
      * @param Payer $payer
-     * @param string $id
      * @param References $references
      * @param Subject $declaredSender
      * @param Services $services
      * @param Parcel[] $parcels
-     * @return void
+     * @return Shipment[]
      */
     public function createShipment(
         $customer,
@@ -100,13 +103,34 @@ class Client {
         $sender,
         $receiver,
         $payer,
-        $id,
         $references,
-        $declaredSender,
-        $services,
+        $declaredSender = null,
+        $services = null,
         $parcels
     ) {
-        $this->connection->createShipment($customer, $deliveryOptions, $shipmentType, $sender, $receiver, $payer, $id, $references, $declaredSender, $services, $parcels);
+        $newShipments = [];
+
+        $data = [
+            [
+                "shipmentType" => $shipmentType,
+                "customer" => $customer,
+                "sender" => $sender,
+                "receiver" => $receiver,
+                "payer" => $payer,
+                "references" => $references,
+                "declaredSender" => $declaredSender,
+                "services" => $services,
+                "parcels" => $parcels
+            ]
+        ];
+        $result = $this->connection->createShipment($data);
+        if (!empty($result)) {
+            foreach ($result as $item) {
+                $newShipments[] = new Shipment($item);
+            }
+        }
+
+        return $newShipments;
     }
 
     public function updateParcel($parcelIdent, $parcelData) {
