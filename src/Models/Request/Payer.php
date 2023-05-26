@@ -13,7 +13,7 @@ class Payer extends AModelRequest
     public $customer;
 
     /**
-     * @var CustomerAddress
+     * @var Address
      */
     public $customerAddress;
 }

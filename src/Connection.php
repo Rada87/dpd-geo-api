@@ -29,6 +29,20 @@ class Connection {
         ]);
     }
 
+    /**
+     * @param $mode
+     * @return string
+     */
+    private function getEndpointUrl($mode)
+    {
+        if ($mode == Modes::PRODUCTION) {
+            return 'https://geoapi.dpd.cz';
+        } else {
+            return 'https://geoapi-test.dpd.cz';
+        }
+    }
+
+
     public function getCustomers() {
         return $this->sendRequest('GET', '/v1/me');
     }
@@ -89,7 +103,7 @@ class Connection {
             ]
         ];
 
-        return $this->sendRequest('POST', '/v1/parcels', $data);
+        return $this->sendRequest('POST', '/v1/shipments', $data);
     }
 
     public function getTrackingInfoForMultipleParcels($parcelNumbers) {
@@ -127,8 +141,10 @@ class Connection {
         try {
             $options = ['headers' => ['x-api-key' => $this->apiKey]];
             if ($method === 'POST') {
+                $data = $this->removeNullValues($data);
                 $options['json'] = $data;
             }
+
             $response = $this->client->request($method, $endpoint, $options);
             return json_decode($response->getBody()->getContents(), true);
         } catch (RequestException $e) {
@@ -140,16 +156,21 @@ class Connection {
         }
     }
 
-    /**
-     * @param $mode
-     * @return string
-     */
-    private function getEndpointUrl($mode)
-    {
-        if ($mode == Modes::PRODUCTION) {
-            return 'https://geoapi.dpd.cz';
-        } else {
-            return 'https://geoapi-test.dpd.cz';
+    private function removeNullValues($data) {
+        if (is_array($data)) {
+            return array_filter(array_map([$this, 'removeNullValues'], $data), function($value) {
+                return !is_null($value);
+            });
+        } elseif (is_object($data)) {
+            foreach ($data as $key => $value) {
+                if (is_null($value)) {
+                    unset($data->$key);
+                } elseif (is_array($value) || is_object($value)) {
+                    $data->$key = $this->removeNullValues($value);
+                }
+            }
+            return $data;
         }
+        return $data;
     }
 }

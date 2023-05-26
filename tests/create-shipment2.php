@@ -5,7 +5,7 @@ use Rada87\DpdGeoApi\Client;
 use Rada87\DpdGeoApi\Enums\Completness;
 use Rada87\DpdGeoApi\Enums\Modes;
 use Rada87\DpdGeoApi\Enums\ShipmentTypes;
-use Rada87\DpdGeoApi\Models\Request\Address;
+use Rada87\DpdGeoApi\Models\Request\Address\Address;
 use Rada87\DpdGeoApi\Models\Request\Address\Address\Country;
 use Rada87\DpdGeoApi\Models\Request\Address\Info;
 use Rada87\DpdGeoApi\Models\Request\Address\Info\Contact;
@@ -22,21 +22,37 @@ $api = new Client(DPD_API_KEY, Modes::TEST);
 
 $eshopSubject = $api->getCustomer();
 
-$order_id = 123456; // your reference indicator
-$orderTotal = 26000;
+$dsw = '55500000000';
+$id = 12345;
+$order_id = 123456;
+$total = 26000;
 
 $deliveryOptions = new DeliveryOptions();
 $deliveryOptions->completeness = Completness::COMPLETE_ONLY;
 
 $shipmentType = ShipmentTypes::Standard;
 
-// Customer
+// Vytvoření instance třídy Customer
 $customer = new Customer();
-$customer->id = $eshopSubject->customer->id;
+$customer->DSW = $eshopSubject->customer->DSW;
+$customer->isActive = true;
+$customer->id = $id;
 
 // Sender
-$sender = new Address();
-$sender->it4emId = $eshopSubject->getAddress()->it4emId;
+$sender = new Subject();
+$sender->info = new Info();
+$sender->info->name1 = "Sender Doe";
+$sender->info->contact = new Contact();
+$sender->info->contact->person = "Sender Name";
+$sender->info->contact->phone = "+420602123123";
+$sender->info->contact->email = "info@example.com";
+$sender->address = new Address();
+$sender->address->street = "Dlouha 123";
+$sender->address->postalCode = "10800";
+$sender->address->city = "Praha 8";
+$sender->address->country = new Country();
+$sender->address->country->isoAlpha3 = 'CZE';
+//$sender->address->houseNumber = "132";
 
 // Receiver
 $receiver = new Subject();
@@ -56,9 +72,22 @@ $receiver->address->country->isoAlpha3 = 'CZE';
 // Payer
 $payer = new Payer();
 $payer->customer = new Customer();
-$payer->customer->id = $eshopSubject->customer->id;
-$payer->customerAddress = new Address();
-$payer->customerAddress->it4emId = $eshopSubject->getAddress()->it4emId;
+$payer->customer->DSW = $dsw;
+$payer->customer->isActive = true;
+$payer->customer->id = $id;
+$payer->customerAddress = new Payer\CustomerAddress();
+$payer->customerAddress->info = new Info();
+$payer->customerAddress->info->name1 = "Payer Declared";
+$payer->customerAddress->info->contact = new Contact();
+$payer->customerAddress->info->contact->person = "Payer Declarede";
+$payer->customerAddress->info->contact->phone = "+420602123123";
+$payer->customerAddress->info->contact->email = "asdasd@example.com";
+$payer->customerAddress->address = new Address();
+$payer->customerAddress->address->street = "Example Street 368/23";
+$payer->customerAddress->address->postalCode = "10800";
+$payer->customerAddress->address->city = "Praha 8";
+$payer->customerAddress->address->country = new Country();
+$payer->customerAddress->address->country->isoAlpha3 = 'CZE';
 
 // References
 $references = new References();
@@ -90,7 +119,6 @@ $services->selectedServices->dpdTimeGuarantee = "DPD12";
 $services->selectedServices->dpdGuarantee = false;
 $services->selectedServices->swap = false;
 $services->selectedServices->dpdPneu = false;
-
 /*
 $services->selectedServices->cashOnDelivery = new stdClass();
 $services->selectedServices->cashOnDelivery->value = "<Error: Too many levels of nesting to fake this schema>";
@@ -113,22 +141,24 @@ $services->selectedServices->shopToShop = false;
 $services->selectedServices->shopToHome = false;
 $services->selectedServices->ddtl = false;
 
-// Parcels
+// \Parcels
 $parcels = [];
 $parcel1 = new Parcel();
+$parcel1->parcelNumber = '13815045502659';
+$parcel1->backParcelNumber = $parcel1->parcelNumber;
 $parcel1->references = new Parcel\References();
 $parcel1->references->ref1 = (string)$order_id;
 $parcel1->additionalServices = new Parcel\AdditionalServices();
 $parcel1->additionalServices->insurance = new Parcel\Insurance();
 $parcel1->additionalServices->insurance->currency = 'CZK';
-$parcel1->additionalServices->insurance->amountCents = $orderTotal;
+$parcel1->additionalServices->insurance->amountCents = $total;
 $parcel1->weightGrams = 850;
 $parcels[] = $parcel1;
 
 
 // Source
 $source = new Source();
-$source->systemId = "CS-Cart.cz"; // your platform ID
+$source->systemId = "CSCart";
 
 
 

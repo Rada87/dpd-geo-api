@@ -27,4 +27,7 @@ class Customer extends AModelResponse
     }
 
 
+    public function getAddress($index = 0) {
+        return $this->addresses[$index] ?? new Address();
+    }
 }
